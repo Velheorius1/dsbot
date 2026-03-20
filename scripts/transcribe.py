@@ -12,7 +12,11 @@ def transcribe(audio_path):
     if ext in ('.ogg', '.oga', '.opus'):
         tmp_fd, tmp_path = tempfile.mkstemp(suffix='.mp3')
         os.close(tmp_fd)
-        subprocess.run(['ffmpeg', '-y', '-i', audio_path, '-q:a', '2', tmp_path], capture_output=True)
+        result = subprocess.run(['ffmpeg', '-y', '-i', audio_path, '-q:a', '2', tmp_path], capture_output=True)
+        if result.returncode != 0:
+            print(f"Error: ffmpeg failed: {result.stderr.decode()}", file=sys.stderr)
+            os.unlink(tmp_path)
+            sys.exit(1)
         upload_path = tmp_path
     else:
         upload_path = audio_path
@@ -24,10 +28,11 @@ def transcribe(audio_path):
         if not api_key:
             env_path = '/opt/second-brain/.env'
             if os.path.exists(env_path):
-                for line in open(env_path):
-                    if line.startswith('GEMINI_API_KEY='):
-                        api_key = line.strip().split('=', 1)[1]
-                        break
+                with open(env_path, encoding='utf-8') as f:
+                    for line in f:
+                        if line.startswith('GEMINI_API_KEY='):
+                            api_key = line.strip().split('=', 1)[1].strip('"\'')
+                            break
         if not api_key:
             print('Error: GEMINI_API_KEY not found', file=sys.stderr)
             sys.exit(1)
