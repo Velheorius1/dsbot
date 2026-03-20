@@ -18,17 +18,17 @@ Telegram-бот (@ds_brain_bot) на базе официального Claude Te
 - Permissions предодобрены в `.claude/settings.json` — не блокируется на промптах
 - Bitrix24 MCP подключён, Knowledge/ доступен
 - Автозапуск при reboot: `@reboot /root/start-dsbot.sh`
-- CLAUDE.md синхронизирован с основным (правила из insights report)
+- **Фото:** плагин скачивает в inbox/, передаёт `image_path` → Claude читает через Read
+- **Голосовые/аудио:** плагин скачивает .ogg/.mp3, передаёт `audio_path` → Claude транскрибирует через `scripts/transcribe.py` (Gemini Flash)
+- **Video notes:** тоже скачиваются и передаются
 
 ### Что в процессе
-- Бот не понимает что присланная картинка — готовый дизайн для обработки (переспрашивает). Telegram плагин передаёт фото как файл но Claude не читает как изображение
 - Долгие задачи (дизайн, анализ URL) занимают 1-3 мин — нормально для Opus
+- Плагин пропатчен (voice/audio/video_note handlers) — при обновлении плагина патч слетит
 
 ### Следующие шаги
-1. **Починить обработку фото** — разобраться как плагин передаёт изображения, сделать чтобы Claude видел картинку
-2. Gemini Flash для транскрипции аудио
-3. Ревью кода проекта
-4. Интеграция с ReportsAnalyze как движок анализа
+1. Ревью кода проекта
+2. Интеграция с ReportsAnalyze как движок анализа
 
 ### Управление на VPS
 ```bash
@@ -60,6 +60,7 @@ iPhone/Mac -> Telegram -> @ds_brain_bot
 | `.mcp.json` | MCP серверы (Bitrix24) |
 | `.claude/channels/telegram/.env` | Токен бота |
 | `.claude/channels/telegram/access.json` | Политика доступа |
+| `scripts/transcribe.py` | Транскрипция аудио через Gemini Flash |
 
 ## Ключевые решения
 - **Официальный плагин > кастомный бот** — без API-расходов, без риска бана, полная мощь Claude Code
