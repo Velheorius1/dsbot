@@ -9,25 +9,36 @@ Telegram-бот (@ds_brain_bot) на базе официального Claude Te
 -> ЧТОБЫ получить всю мощь Claude Code (файлы, код, CRM, анализ) без ограничений API
 
 ## Текущий статус
-Фаза: **MVP** — настройка и первый запуск
+Фаза: **MVP работает, стабилизация**
 Дата обновления: 2026-03-20
 
 ### Что работает
-- Бот @ds_aibrain_bot — отвечает через Claude Code (Opus 4.6, подписка)
-- Pairing + allowlist (user ID: 221998785)
-- ackReaction 👀 на входящие
-- CLAUDE.md инструкции — личность, стиль, задачи
-- Bitrix24 MCP подключён
-- Bun v1.3.11, плагин telegram@claude-plugins-official
+- Бот @ds_brain_bot отвечает в Telegram (Opus 4.6, 1M ctx, Max подписка)
+- Работает из `/opt/second-brain/` — видит все проекты (sync через GitHub каждые 5 мин)
+- Permissions предодобрены в `.claude/settings.json` — не блокируется на промптах
+- Bitrix24 MCP подключён, Knowledge/ доступен
+- Автозапуск при reboot: `@reboot /root/start-dsbot.sh`
+- CLAUDE.md синхронизирован с основным (правила из insights report)
 
 ### Что в процессе
-- Тестирование Bitrix24 через Telegram
-- Тестирование файлов Second Brain
+- Бот не понимает что присланная картинка — готовый дизайн для обработки (переспрашивает). Telegram плагин передаёт фото как файл но Claude не читает как изображение
+- Долгие задачи (дизайн, анализ URL) занимают 1-3 мин — нормально для Opus
 
 ### Следующие шаги
-1. Протестировать Bitrix24 запросы через бота
-2. Протестировать отправку файлов
-3. Деплой на VPS для 24/7
+1. **Починить обработку фото** — разобраться как плагин передаёт изображения, сделать чтобы Claude видел картинку
+2. Gemini Flash для транскрипции аудио
+3. Ревью кода проекта
+4. Интеграция с ReportsAnalyze как движок анализа
+
+### Управление на VPS
+```bash
+# Проверить статус
+ssh root@46.62.155.190 "tmux capture-pane -t dsbot -p | strings | tail -10"
+# Перезапустить
+ssh root@46.62.155.190 "tmux kill-server; tmux new-session -d -s dsbot 'cd /opt/second-brain && export PATH=/root/.bun/bin:\$PATH && claude --channels plugin:telegram@claude-plugins-official'"
+# Проверить permission промпт
+ssh root@46.62.155.190 "tmux capture-pane -t dsbot -p | strings | grep 'Do you want'"
+```
 
 ## Архитектура
 ```
