@@ -1,0 +1,18 @@
+# Secrets
+.env
+.claude/channels/telegram/.env
+
+# Access config (contains user IDs)
+.claude/channels/telegram/access.json
+
+# Plugin files (installed locally)
+.claude-plugin/
+
+# Inbox (downloaded photos/files)
+.claude/channels/telegram/inbox/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store

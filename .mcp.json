@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "bitrix24": {
+      "command": "node",
+      "args": ["/Users/doniersalahutdinov/Desktop/Second_Brain/Projects/bitrix-brain/mcp-server/build/index.js"],
+      "env": {
+        "BITRIX24_WEBHOOK_URL": "https://winch.bitrix24.ru/rest/1/vupsh2hmddzbpn53/"
+      }
+    }
+  }
+}
