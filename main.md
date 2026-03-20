@@ -13,21 +13,21 @@ Telegram-бот (@ds_brain_bot) на базе официального Claude Te
 Дата обновления: 2026-03-20
 
 ### Что работает
-- Структура проекта создана
-- CLAUDE.md с инструкциями
+- Бот @ds_aibrain_bot — отвечает через Claude Code (Opus 4.6, подписка)
+- Pairing + allowlist (user ID: 221998785)
+- ackReaction 👀 на входящие
+- CLAUDE.md инструкции — личность, стиль, задачи
 - Bitrix24 MCP подключён
+- Bun v1.3.11, плагин telegram@claude-plugins-official
 
 ### Что в процессе
-- Создание бота в BotFather
-- Установка плагина
-- Первый запуск и тест
+- Тестирование Bitrix24 через Telegram
+- Тестирование файлов Second Brain
 
 ### Следующие шаги
-1. Создать бота @ds_brain_bot в BotFather
-2. Установить плагин: `/plugin install telegram@claude-plugins-official`
-3. Настроить токен и access control
-4. Тест на маке
-5. Деплой на VPS (фаза 2)
+1. Протестировать Bitrix24 запросы через бота
+2. Протестировать отправку файлов
+3. Деплой на VPS для 24/7
 
 ## Архитектура
 ```
