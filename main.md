@@ -9,37 +9,40 @@ Telegram-бот (@ds_brain_bot) на базе официального Claude Te
 -> ЧТОБЫ получить всю мощь Claude Code (файлы, код, CRM, анализ) без ограничений API
 
 ## Текущий статус
-Фаза: **MVP работает, стабилизация**
-Дата обновления: 2026-03-20
+Фаза: **Полноценный второй мозг**
+Дата обновления: 2026-03-21
 
 ### Что работает
-- Бот @ds_brain_bot отвечает в Telegram (Opus 4.6, 1M ctx, Max подписка)
-- Работает из `/opt/second-brain/` — видит все проекты (sync через GitHub каждые 5 мин)
-- Permissions предодобрены в `.claude/settings.json` — не блокируется на промптах
-- Bitrix24 MCP подключён, Knowledge/ доступен
-- Автозапуск при reboot: `@reboot /root/start-dsbot.sh`
-- **Фото:** плагин скачивает в inbox/, передаёт `image_path` → Claude читает через Read
-- **Голосовые/аудио:** плагин скачивает .ogg/.mp3, передаёт `audio_path` → Claude транскрибирует через `scripts/transcribe.py` (Gemini Flash)
-- **Video notes:** тоже скачиваются и передаются
+- Бот @ds_brain_bot — Opus 4.6, 1M ctx, Max подписка
+- **Планировщик:** tasks.md (51 задача), backlog, memories, context.md (сохранение контекста)
+- **Брифинги:** cron 07:00/12:00/21:00 + Вс 20:00, standalone
+- **Проактивные алерты:** cron каждые 4ч — P1 + Bitrix стухшие сделки
+- **Bitrix24 MCP:** собран на VPS, работает
+- **Контракты PDF:** `scripts/contract/generator.py` — генерация договоров Winch/Салахутдинов
+- **ReportsAnalyze:** CLAUDE.md инструкции для `docker exec winch-bot`
+- **Google Calendar:** `scripts/calendar_utils.py` — события, создание встреч (токен нужно обновить)
+- **TTS:** `scripts/tts.py` — ElevenLabs голосовые ответы (нужен API key)
+- **Фото/голосовые/video notes:** форк плагина + bot.catch()
+- **Watchdog + логи:** watchdog.log, stderr.log, briefing.log
 
-### Что в процессе
-- Долгие задачи (дизайн, анализ URL) занимают 1-3 мин — нормально для Opus
-- Плагин пропатчен (voice/audio/video_note handlers) — при обновлении плагина патч слетит
+### Что требует действий от Данияра
+- **Google Calendar:** токен истёк — повторить OAuth через brain-bot `/google_auth`
+- **ElevenLabs TTS:** купить Starter ($5/мес), добавить ELEVENLABS_API_KEY в .env
 
 ### Следующие шаги
-1. Тест голосовых — отправить голосовое в @ds_brain_bot, проверить транскрипцию
-2. Тест фото — отправить картинку с caption-инструкцией
-3. Интеграция с ReportsAnalyze как движок анализа
-4. Сохранить патч плагина (voice/audio/video_note) отдельно — слетит при обновлении
+1. Обновить Google Calendar токен
+2. Купить ElevenLabs Starter, добавить API key
+3. Мониторить логи первые дни (watchdog, briefing, stderr)
+4. Архитектурная визуализация: `Projects/dsbot/architecture.html`
 
 ### Управление на VPS
 ```bash
 # Проверить статус
 ssh root@46.62.155.190 "tmux capture-pane -t dsbot -p | strings | tail -10"
-# Перезапустить
-ssh root@46.62.155.190 "tmux kill-server; tmux new-session -d -s dsbot 'cd /opt/second-brain && export PATH=/root/.bun/bin:\$PATH && claude --channels plugin:telegram@claude-plugins-official'"
-# Проверить permission промпт
-ssh root@46.62.155.190 "tmux capture-pane -t dsbot -p | strings | grep 'Do you want'"
+# Перезапустить (применяет форк автоматически)
+ssh root@46.62.155.190 "tmux kill-session -t dsbot; sleep 1; /root/start-dsbot.sh"
+# Watchdog лог
+ssh root@46.62.155.190 "tail -20 /var/log/dsbot-watchdog.log"
 ```
 
 ## Архитектура
@@ -63,8 +66,21 @@ iPhone/Mac -> Telegram -> @ds_brain_bot
 | `.claude/channels/telegram/.env` | Токен бота |
 | `.claude/channels/telegram/access.json` | Политика доступа |
 | `scripts/transcribe.py` | Транскрипция аудио через Gemini Flash |
+| `scripts/send_briefing.py` | Standalone брифинги (morning/midday/evening/weekly) |
+| `scripts/proactive_alerts.py` | P1 задачи + Bitrix стухшие сделки |
+| `scripts/planner_utils.py` | Парсер tasks.md + Bitrix API + Telegram sender |
+| `planner/tasks.md` | Активные задачи (P1/P2/P3) |
+| `planner/memories.md` | Персистентная память |
+| `planner/context.md` | Контекст последнего разговора (сохранение между сессиями) |
+| `scripts/calendar_utils.py` | Google Calendar CLI (today/tomorrow/week/create) |
+| `scripts/contract/generator.py` | PDF контракты Winch/Салахутдинов |
+| `scripts/tts.py` | ElevenLabs TTS (текст → .ogg) |
+| `plugin-fork/server.ts` | Форк Telegram плагина (voice/audio/video_note + bot.catch) |
+| `architecture.html` | Визуализация архитектуры DSBot |
 
 ## Ключевые решения
 - **Официальный плагин > кастомный бот** — без API-расходов, без риска бана, полная мощь Claude Code
 - **Bitrix24 = первая интеграция** — уже есть MCP сервер, сразу работает
-- **Brain-bot остаётся** — dsbot не заменяет, а дополняет (разные модели, разные возможности)
+- **DSBot = основной "второй мозг"** — Brain Bot остаётся как бэкап
+- **Standalone скрипты** — брифинги и алерты не зависят от Claude (работают даже если сессия мертва)
+- **Файлы > SQLite** — Claude нативно читает/пишет markdown, git = версионность
