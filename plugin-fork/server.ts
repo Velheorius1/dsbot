@@ -511,24 +511,10 @@ bot.on('message:text', async ctx => {
 
 bot.on('message:photo', async ctx => {
   const caption = ctx.message.caption ?? '(photo)'
+  const photos = ctx.message.photo
+  const best = photos[photos.length - 1]
   await handleInbound(ctx, caption, async () => {
-    const photos = ctx.message.photo
-    const best = photos[photos.length - 1]
-    try {
-      const file = await ctx.api.getFile(best.file_id)
-      if (!file.file_path) return undefined
-      const url = `https://api.telegram.org/file/bot${TOKEN}/${file.file_path}`
-      const res = await fetch(url)
-      const buf = Buffer.from(await res.arrayBuffer())
-      const ext = file.file_path.split('.').pop() ?? 'jpg'
-      const path = join(INBOX_DIR, `${Date.now()}-${best.file_unique_id}.${ext}`)
-      mkdirSync(INBOX_DIR, { recursive: true })
-      writeFileSync(path, buf)
-      return path
-    } catch (err) {
-      process.stderr.write(`telegram channel: photo download failed: ${err}\n`)
-      return undefined
-    }
+    return downloadTgFile(ctx, best.file_id, best.file_unique_id, 'jpg')
   })
 })
 
