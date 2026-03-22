@@ -1,6 +1,7 @@
 # Secrets
 .env
 .claude/channels/telegram/.env
+.mcp.json
 
 # Access config (contains user IDs)
 .claude/channels/telegram/access.json

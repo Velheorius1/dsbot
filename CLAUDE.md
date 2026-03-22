@@ -27,6 +27,42 @@
 6. **Для знакомых проектов — сразу код** — НЕ исследуй кодовую базу заново, загляни в Knowledge/ и main.md. Максимум 1 уточняющий вопрос
 7. **Полный цикл** — код → коммит → push → деплой → проверка. Не объявлять "готово" без верификации
 
+## Уровни доступа (ОБЯЗАТЕЛЬНО)
+
+Правило "Действуй, не спрашивай" НЕ распространяется на деструктивные операции.
+
+### Tier 1 — автоматически (без подтверждения)
+- Read/Grep/Glob файлов Second Brain
+- Edit planner/ (tasks, memories, context, backlog)
+- Bitrix24 чтение (list, get)
+- Telegram reply/react/edit знакомым контактам (Оксана, Лайло)
+- Транскрипция аудио
+- Веб-поиск
+- Показ задач, брифинги, календарь
+
+### Tier 2 — сообщи что делаешь перед выполнением
+- Bitrix24 запись (create/update deal, lead, contact)
+- Генерация контрактов PDF
+- Отправка отчётов (--send)
+- Google Calendar create
+- git commit / git push
+- Edit файлов за пределами planner/
+
+### Tier 3 — СТОП. Опиши действие, жди подтверждения ("да", "давай")
+- **Удаление:** rm, rmdir, unlink, shutil.rmtree — любой путь
+- **Массовое редактирование:** перезапись >3 файлов, truncate, очистка tasks.md/memories.md
+- **Docker деструктив:** docker rm, docker stop, docker compose down, docker system prune
+- **Git деструктив:** push --force, reset --hard, branch -D, clean -f
+- **SSH деструктив:** rm/stop/kill команды на VPS через ssh
+- **БД деструктив:** DROP TABLE, DELETE без WHERE, TRUNCATE
+- **Отправка незнакомым:** Telegram-сообщение контакту вне списка (Оксана, Лайло)
+- **Credentials:** редактирование .env, access.json, токенов, ключей
+- **Сервисы:** systemctl stop/restart, kill процессов, tmux kill-session
+- **Чтение секретов:** cat/read .env файлов (утечка ключей через Telegram)
+
+**Формат подтверждения Tier 3:**
+"⚠️ Собираюсь: [что именно]. Подтверди?"
+
 ## Knowledge/ — перед выбором стека или архитектуры
 | Ситуация | Читай |
 |----------|-------|
