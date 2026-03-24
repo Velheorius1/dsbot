@@ -117,8 +117,9 @@ def get_salesbot_stats(report_date=None):
     try:
         cmd = [
             "docker", "exec", "salesbot", "python3", "-c",
-            "from bot.conversation import get_daily_stats; "
+            "from bot.conversation import init_db, get_daily_stats; "
             "import json; "
+            "init_db(); "
             "stats = get_daily_stats('{}'); ".format(report_date) +
             "print(json.dumps(stats))"
         ]
