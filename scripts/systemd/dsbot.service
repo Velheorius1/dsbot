@@ -1,0 +1,44 @@
+[Unit]
+Description=DSBot - Claude Code Telegram Assistant
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User=root
+WorkingDirectory=/opt/second-brain
+
+# Clean up zombies before starting
+ExecStartPre=/opt/second-brain/Projects/dsbot/scripts/dsbot-cleanup.sh
+
+# Launch tmux session (forks, so Type=forking)
+ExecStart=/opt/second-brain/Projects/dsbot/scripts/dsbot-tmux-launcher.sh
+
+# Graceful shutdown
+ExecStop=/opt/second-brain/Projects/dsbot/scripts/dsbot-tmux-stop.sh
+
+# PID tracking
+PIDFile=/run/dsbot-tmux.pid
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Environment
+Environment=HOME=/root
+Environment=PATH=/root/.local/bin:/root/.claude/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Kill entire cgroup on stop (catches orphaned bun/claude)
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dsbot
+
+[Install]
+WantedBy=multi-user.target

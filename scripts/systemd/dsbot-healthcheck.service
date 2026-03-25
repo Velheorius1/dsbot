@@ -1,0 +1,6 @@
+[Unit]
+Description=DSBot Health Check
+
+[Service]
+Type=oneshot
+ExecStart=/opt/second-brain/Projects/dsbot/scripts/dsbot-healthcheck.sh
