@@ -5,7 +5,7 @@ TMUX_SESSION="dsbot"
 PIDFILE="/run/dsbot-tmux.pid"
 LOG_TAG="dsbot-launcher"
 WORKDIR="/opt/second-brain"
-CLAUDE_CMD="claude --channels plugin:telegram@claude-plugins-official"
+STDERR_LOG="/var/log/dsbot-stderr.log"
 
 # If tmux session already exists, kill it (stale from crash)
 if tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
@@ -14,9 +14,11 @@ if tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
     sleep 2
 fi
 
-# Start tmux detached session
-cd "$WORKDIR"
-tmux new-session -d -s "$TMUX_SESSION" "$CLAUDE_CMD"
+# Pull latest code (same as old start-dsbot.sh)
+cd "$WORKDIR" && git pull --ff-only 2>/dev/null || true
+
+# Start tmux detached session (exact format from working start-dsbot.sh)
+tmux new-session -d -s "$TMUX_SESSION" "cd $WORKDIR && export PATH=/root/.local/bin:/root/.bun/bin:\$PATH && claude --channels plugin:telegram@claude-plugins-official 2>>$STDERR_LOG"
 
 # Write tmux server PID for systemd tracking
 sleep 1
