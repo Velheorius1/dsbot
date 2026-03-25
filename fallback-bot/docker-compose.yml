@@ -1,0 +1,21 @@
+services:
+  dsbot-fallback:
+    build: .
+    container_name: dsbot-fallback
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - TZ=Asia/Tashkent
+      - SECOND_BRAIN_DIR=/opt/second-brain
+    volumes:
+      - /opt/second-brain:/opt/second-brain
+      - dsbot-fallback-data:/app/data
+      - /root/.claude:/root/.claude:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  dsbot-fallback-data:
