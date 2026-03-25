@@ -72,6 +72,29 @@ if [ "$BOT_COUNT" -gt 1 ]; then
     pgrep -f "bun.*server\.ts" 2>/dev/null | grep -v "^${OLDEST_PID}$" | xargs kill -9 2>/dev/null || true
 fi
 
+# Check 5: bun is actually polling Telegram (not just alive but idle)
+# CANNOT use getUpdates — it steals the polling slot and kills bun's loop!
+# Instead: check if bun has active network connections to api.telegram.org.
+# If bun is polling, it has an open TCP connection (long-poll) to Telegram.
+if [ -n "$BUN_PID" ]; then
+    UPTIME_SEC=$(systemctl show dsbot.service --property=ActiveEnterTimestamp --value 2>/dev/null || echo "")
+    RUNNING_FOR=0
+    if [ -n "$UPTIME_SEC" ]; then
+        START_EPOCH=$(date -d "$UPTIME_SEC" +%s 2>/dev/null || echo 0)
+        NOW_EPOCH=$(date +%s)
+        RUNNING_FOR=$((NOW_EPOCH - START_EPOCH))
+    fi
+
+    if [ "$RUNNING_FOR" -gt 180 ]; then
+        # Check if bun has ESTABLISHED connections (long-polling = open TCP to Telegram)
+        CONN_COUNT=$(ss -tnp 2>/dev/null | grep "pid=$BUN_PID" | grep -c "ESTAB" || echo 0)
+        if [ "$CONN_COUNT" -eq 0 ]; then
+            # No network connections at all — bun is idle, not polling
+            check_failed "bun alive but no network connections (not polling, ${RUNNING_FOR}s uptime)"
+        fi
+    fi
+fi
+
 # All checks passed
 echo "HEALTHY $(date) claude=$CLAUDE_PID bun=${BUN_PID:-starting}" > "$HEALTH_FILE"
 # Log OK only every 5th check to reduce noise (check /tmp counter)
