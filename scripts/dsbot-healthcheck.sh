@@ -21,6 +21,12 @@ check_failed() {
     fi
     touch "$LOCK_FILE"
 
+    # Log crash context BEFORE restart
+    CRASH_LOGGER="/opt/second-brain/Projects/dsbot/scripts/crash-logger.sh"
+    if [ -x "$CRASH_LOGGER" ]; then
+        bash "$CRASH_LOGGER" "$reason" || true
+    fi
+
     # Restart the service
     logger -t "$LOG_TAG" "Triggering restart via systemctl"
     systemctl restart dsbot.service
