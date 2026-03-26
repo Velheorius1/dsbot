@@ -10,6 +10,17 @@ check_failed() {
     logger -t "$LOG_TAG" "UNHEALTHY: $reason"
     echo "UNHEALTHY: $reason $(date)" > "$HEALTH_FILE"
 
+    # Prevent double restarts (lock for 120s)
+    LOCK_FILE="/tmp/dsbot_restart.lock"
+    if [ -f "$LOCK_FILE" ]; then
+        local lock_age=$(( $(date +%s) - $(stat -c %Y "$LOCK_FILE" 2>/dev/null || echo 0) ))
+        if [ "$lock_age" -lt 120 ]; then
+            logger -t "$LOG_TAG" "Restart lock active (${lock_age}s ago), skipping restart"
+            exit 0
+        fi
+    fi
+    touch "$LOCK_FILE"
+
     # Restart the service
     logger -t "$LOG_TAG" "Triggering restart via systemctl"
     systemctl restart dsbot.service

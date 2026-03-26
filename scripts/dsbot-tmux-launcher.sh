@@ -2,7 +2,7 @@
 set -euo pipefail
 
 TMUX_SESSION="dsbot"
-PIDFILE="/run/dsbot-tmux.pid"
+PIDFILE="/tmp/dsbot-tmux.pid"
 LOG_TAG="dsbot-launcher"
 WORKDIR="/opt/second-brain"
 STDERR_LOG="/var/log/dsbot-stderr.log"
@@ -43,3 +43,16 @@ if ! tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
 fi
 
 logger -t "$LOG_TAG" "DSBot verified running"
+
+# === BOOT PROTOCOL ===
+# Wait for Claude to fully initialize (channels + plugin load)
+sleep 10
+
+# Send boot prompt — Claude will Read the file via its own tools
+BOOT_FILE="$WORKDIR/Projects/dsbot/boot.md"
+if [ -f "$BOOT_FILE" ]; then
+    tmux send-keys -t "$TMUX_SESSION" "Read /opt/second-brain/Projects/dsbot/boot.md and execute all 7 phases" Enter
+    logger -t "$LOG_TAG" "Boot prompt sent to Claude session"
+else
+    logger -t "$LOG_TAG" "WARNING: boot.md not found at $BOOT_FILE"
+fi
