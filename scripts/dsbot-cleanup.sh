@@ -19,12 +19,14 @@ if [ -n "$BUN_PIDS" ]; then
     sleep 1
 fi
 
-# Kill stale tmux session
-if tmux has-session -t dsbot 2>/dev/null; then
-    logger -t "$LOG_TAG" "Killing stale tmux session"
-    tmux kill-session -t dsbot 2>/dev/null || true
-    sleep 1
-fi
+# Kill stale tmux session (check both root and dsbot user sockets)
+for sock in /tmp/tmux-*/default; do
+    if [ -S "$sock" ] && tmux -S "$sock" has-session -t dsbot 2>/dev/null; then
+        logger -t "$LOG_TAG" "Killing stale tmux session (socket=$sock)"
+        tmux -S "$sock" kill-session -t dsbot 2>/dev/null || true
+        sleep 1
+    fi
+done
 
 # Clean PID file
 rm -f /run/dsbot-tmux.pid

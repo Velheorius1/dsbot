@@ -18,7 +18,7 @@ fi
 cd "$WORKDIR" && git pull --ff-only 2>/dev/null || true
 
 # Start tmux detached session (exact format from working start-dsbot.sh)
-tmux new-session -d -s "$TMUX_SESSION" "cd $WORKDIR && export PATH=/root/.local/bin:/root/.bun/bin:\$PATH && claude --channels plugin:telegram@claude-plugins-official 2>>$STDERR_LOG"
+tmux new-session -d -s "$TMUX_SESSION" "cd $WORKDIR && export PATH=\$HOME/.local/bin:\$HOME/.bun/bin:/usr/local/bin:\$PATH && claude --dangerously-skip-permissions --channels plugin:telegram@claude-plugins-official 2>>$STDERR_LOG"
 
 # Write tmux server PID for systemd tracking
 sleep 1

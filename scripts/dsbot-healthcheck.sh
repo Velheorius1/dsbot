@@ -35,13 +35,17 @@ if [ "$SERVICE_STATE" = "inactive" ] || [ "$SERVICE_STATE" = "failed" ]; then
     exit 0
 fi
 
+# tmux socket for dsbot user (UID 1000)
+DSBOT_TMUX_SOCK="/tmp/tmux-$(id -u dsbot 2>/dev/null || echo 1000)/default"
+TMUX_OPTS="-S $DSBOT_TMUX_SOCK"
+
 # Check 1: tmux session exists
-if ! tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
+if ! tmux $TMUX_OPTS has-session -t "$TMUX_SESSION" 2>/dev/null; then
     check_failed "tmux session missing"
 fi
 
 # Check 2: claude process is alive (not zombie)
-CLAUDE_PID=$(tmux list-panes -t "$TMUX_SESSION" -F '#{pane_pid}' 2>/dev/null | head -1 || true)
+CLAUDE_PID=$(tmux $TMUX_OPTS list-panes -t "$TMUX_SESSION" -F '#{pane_pid}' 2>/dev/null | head -1 || true)
 if [ -z "$CLAUDE_PID" ]; then
     check_failed "no pane PID in tmux"
 fi

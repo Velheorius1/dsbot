@@ -6,8 +6,12 @@ LOG_TAG="dsbot-stop"
 
 logger -t "$LOG_TAG" "Stopping DSBot..."
 
+# tmux socket for dsbot user
+DSBOT_TMUX_SOCK="/tmp/tmux-$(id -u dsbot 2>/dev/null || echo 1000)/default"
+TMUX_OPTS="-S $DSBOT_TMUX_SOCK"
+
 # Step 1: Send SIGTERM to claude process inside tmux
-CLAUDE_PID=$(tmux list-panes -t "$TMUX_SESSION" -F '#{pane_pid}' 2>/dev/null | head -1 || true)
+CLAUDE_PID=$(tmux $TMUX_OPTS list-panes -t "$TMUX_SESSION" -F '#{pane_pid}' 2>/dev/null | head -1 || true)
 
 if [ -n "$CLAUDE_PID" ]; then
     # Send SIGTERM to the process group (claude + bun children)
@@ -32,7 +36,7 @@ if [ -n "$CLAUDE_PID" ]; then
 fi
 
 # Step 2: Kill the tmux session
-tmux kill-session -t "$TMUX_SESSION" 2>/dev/null || true
+tmux $TMUX_OPTS kill-session -t "$TMUX_SESSION" 2>/dev/null || true
 
 # Step 3: Final cleanup of any orphans
 pkill -f "claude.*channels.*telegram" 2>/dev/null || true
